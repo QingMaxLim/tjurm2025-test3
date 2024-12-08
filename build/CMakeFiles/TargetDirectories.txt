@@ -1,0 +1,3 @@
+/home/dwq/Test3/build/CMakeFiles/edit_cache.dir
+/home/dwq/Test3/build/CMakeFiles/rebuild_cache.dir
+/home/dwq/Test3/build/CMakeFiles/Test3.dir

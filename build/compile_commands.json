@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/dwq/Test3/build",
+  "command": "/usr/bin/g++   -isystem /usr/local/include/opencv4  -g   -o CMakeFiles/Test3.dir/main.cpp.o -c /home/dwq/Test3/main.cpp",
+  "file": "/home/dwq/Test3/main.cpp"
+}
+]
