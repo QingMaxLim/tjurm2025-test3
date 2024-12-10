@@ -182,6 +182,32 @@ int main(int,char**){
         putText(src,"4",cornerFourthMoment,FONT_HERSHEY_SIMPLEX,1,Scalar(255,200,0),LINE_4);
         
         // imshow("src",src);
+
+        //相机的内参矩阵
+        Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
+
+        //相机的畸变系数
+        Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
+        distCoeffs.at<double>(0,0) = -0.157095872989630;
+        distCoeffs.at<double>(1,0) = 0.166823029778507;
+        distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
+        distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
+        distCoeffs.at<double>(4,0) = -0.070807947517560;
+
+        //图像坐标点
+        vector<Point2f> imagePoint = {Point2f((float)cornerThirdMoment.x,(float)cornerThirdMoment.y),Point2f((float)cornerFourthMoment.x,(float)cornerFirstMoment.y),Point2f((float)cornerSecondMomnet.x,(float)cornerSecondMomnet.y)};
+
+        //世界坐标点的三维坐标
+        vector<Point3f> objectPoint = {Point3f(0,0,0),Point3f(0,0,288),Point3f(288,0,0)};//O,A,B
+
+        //相机位姿态估计
+        Mat rvec;//旋转向量
+        Mat tvec;//平移向量
+
+        //pnp解算
+        solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
+        // cout << rvec << endl;
+        // cout << tvec << endl;
     }
 
     //标记大拐角的点
@@ -327,31 +353,6 @@ int main(int,char**){
     }
 
     imshow("src",src);
-
-    //相机的内参矩阵
-    Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
-
-    //相机的畸变系数
-    Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
-    distCoeffs.at<double>(0,0) = -0.157095872989630;
-    distCoeffs.at<double>(1,0) = 0.166823029778507;
-    distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
-    distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
-    distCoeffs.at<double>(4,0) = -0.070807947517560;
-
-    //图像坐标点
-    // cout << cornerThirdMoment.x << " " << cornerThirdMoment.y << endl;
-    vector<Point2f> imagePoint = {Point2f()};
-
-    //世界坐标点的三维坐标
-    vector<Point3f> objectPoint = {Point3f(0,0,0),Point3f(0,0,288),Point3f(288,0,0)};//O,A,B
-
-    //相机位姿态估计
-    Mat rvec;//旋转向量
-    Mat tvec;//平移向量
-
-    //pnp解算
-    solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec);
 
     waitKey(0);
 
