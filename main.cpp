@@ -17,7 +17,7 @@ int main(int,char**){
     vector<Point> anchorUp;
     vector<Point> anchorDown;
     
-    Mat src = imread("../res/oreTrough/20211839746.jpg");
+    Mat src = imread("../res/oreTrough/20211742189.jpg");
     // imshow("src",src);
 
     //如果图片读取失败则退出
@@ -31,6 +31,7 @@ int main(int,char**){
     // imshow("Hsv",Hsv);
 
     //设置红色阈值
+
     Scalar lowerRed(0,40,40);
     Scalar upperRed(20,255,255);
 
@@ -195,19 +196,33 @@ int main(int,char**){
         distCoeffs.at<double>(4,0) = -0.070807947517560;
 
         //图像坐标点
-        vector<Point2f> imagePoint = {Point2f((float)cornerThirdMoment.x,(float)cornerThirdMoment.y),Point2f((float)cornerFourthMoment.x,(float)cornerFirstMoment.y),Point2f((float)cornerSecondMomnet.x,(float)cornerSecondMomnet.y)};
+        vector<Point2f> imagePoint = {Point2f((float)cornerThirdMoment.x,(float)cornerThirdMoment.y),Point2f((float)cornerFourthMoment.x,(float)cornerFirstMoment.y),Point2f((float)cornerSecondMomnet.x,(float)cornerSecondMomnet.y),Point2f((float)cornerFirstMoment.x,(float)cornerFirstMoment.y)};
 
         //世界坐标点的三维坐标
-        vector<Point3f> objectPoint = {Point3f(0,0,0),Point3f(0,0,288),Point3f(288,0,0)};//O,A,B
+        vector<Point3f> objectPoint = {Point3f(0,0,0),Point3f(0,0,231.5),Point3f(231.5,0,0),Point3f(231.5,0,231.5)};
 
         //相机位姿态估计
         Mat rvec;//旋转向量
         Mat tvec;//平移向量
 
         //pnp解算
-        solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
-        // cout << rvec << endl;
-        // cout << tvec << endl;
+        solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec);
+        cout << "rvec = " << rvec << endl;
+        cout << "tvec = " << tvec << endl;
+
+        //坐标可视化
+        vector<Point2f> toImagePoint;
+        vector<Point3f> fromObjectPoint = {Point3f(0,0,0),Point3f(50,0,0),Point3f(0,50,0),Point3f(0,0,50)};
+
+        projectPoints(fromObjectPoint,rvec,tvec,cameraMatrix,distCoeffs,toImagePoint);
+        cout << toImagePoint <<endl;
+        for(int i = 0;i < toImagePoint.size();i++){
+            circle(src,toImagePoint[2],3,Scalar(255,255,0));
+        }
+
+        line(src,toImagePoint[0],toImagePoint[3],Scalar(255,0,0),2);
+        line(src,toImagePoint[0],toImagePoint[1],Scalar(0,255,0),2);
+        line(src,toImagePoint[0],toImagePoint[2],Scalar(0,0,255),2);
     }
 
     //标记大拐角的点
@@ -348,6 +363,32 @@ int main(int,char**){
         putText(src,"3",downOrRight,cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,200,0),cv::LINE_4);
         circle(src,middle,5,cv::Scalar(255,200,0),-1);
         putText(src,"2",middle,cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,200,0),cv::LINE_4);
+
+        //相机的内参矩阵
+        Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
+
+        //相机的畸变系数
+        Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
+        distCoeffs.at<double>(0,0) = -0.157095872989630;
+        distCoeffs.at<double>(1,0) = 0.166823029778507;
+        distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
+        distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
+        distCoeffs.at<double>(4,0) = -0.070807947517560;
+
+        //三维坐标
+        vector<Point3f> objectPoint{Point3f(0,145.5,215.75),Point3f(0,145.5,15.75),Point3f(0,45.5,115.75)};
+
+        //二维坐标
+        vector<Point2f> imagePoint{Point2f((float)upOrLeft.x,(float)upOrLeft.y),Point2f((float)downOrRight.x,(float)downOrRight.y),Point2f((float)middle.x,(float)middle.y)};
+
+        //相机位姿态估计
+        Mat rvec;//旋转向量
+        Mat tvec;//平移向量
+
+        //pnp解算
+        solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
+        cout << "rvec = " << rvec << endl;
+        cout << "tvec = " << tvec << endl;
 
         // imshow("drawImage",drawImage);
     }
