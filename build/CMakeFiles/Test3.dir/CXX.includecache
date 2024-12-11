@@ -21,6 +21,10 @@ opencv2/opencv.hpp
 -
 caculate.h
 /home/dwq/Test3/caculate.h
+string
+-
+dirent.h
+-
 
 /usr/local/include/opencv4/opencv2/calib3d.hpp
 opencv2/core.hpp

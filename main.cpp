@@ -1,6 +1,8 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "caculate.h"
+#include <string>
+#include <dirent.h>
 
 using namespace std;
 using namespace cv;
@@ -17,14 +19,61 @@ int main(int,char**){
     vector<Point> anchorUp;
     vector<Point> anchorDown;
     
-    Mat src = imread("../res/oreTrough/20211742189.jpg");
+    //批量读取
+    // Mat src = imread("../res/oreTrough/20211742189.jpg");
+
+    // string imageFolder = "../res/oreTrough";//图片文件夹路径
+    // string extension = ".jpg";//图片文件的扩展名
+    // //获取文件夹内所有图片文件的路径
+    // vector<string> imageFiles;
+    // glob(imageFolder,imageFiles,false);
+    // //创建窗口
+    // int windowWidth = 640;
+    // int windowHeight = 480;
+    // namedWindow("output",WINDOW_AUTOSIZE);
+    // //批量读取并显示图片
+    // Mat src;
+    // for(const auto& file : imageFiles){
+    //     src = imread(file);
+    //     if(src.empty()){
+    //         cout << "Failed to read image" << endl;
+    //         continue;
+    //     }
+    // }
+
+    std::string folderPath = "../res/oreTrough"; // 修改为你的图片文件夹路径
+    DIR *dir;
+    struct dirent *ent;
+    Mat src;
+    if ((dir = opendir(folderPath.c_str())) != NULL) {
+        while ((ent = readdir (dir)) != NULL) {
+            if (ent->d_type == DT_REG) { // DT_REG 是一个文件
+                std::string imgName = folderPath + "/" + ent->d_name;
+                src = cv::imread(imgName);
+                if (!src.empty()) {
+                    cv::imshow("Image", src);
+                    int key = cv::waitKey(0); // 等待按键
+                    if (key == 27) { // 如果按键是ESC，则退出循环
+                        break;
+                    }
+                } else {
+                    std::cerr << "无法读取图片: " << imgName << std::endl;
+                }
+            }
+        }
+        closedir (dir);
+    } else {
+        std::cerr << "无法打开目录: " << folderPath << std::endl;
+        return -1;
+    }
+    
     // imshow("src",src);
 
-    //如果图片读取失败则退出
-    if(src.empty()){
-        cout << "Failed to read image" << endl;
-        return EXIT_FAILURE;
-    }
+    // //如果图片读取失败则退出
+    // if(src.empty()){
+    //     cout << "Failed to read image" << endl;
+    //     return EXIT_FAILURE;
+    // }
 
     Mat Hsv;
     cvtColor(src,Hsv,COLOR_BGR2HSV);
@@ -364,38 +413,38 @@ int main(int,char**){
         circle(src,middle,5,cv::Scalar(255,200,0),-1);
         putText(src,"2",middle,cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,200,0),cv::LINE_4);
 
-        //相机的内参矩阵
-        Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
+        // //相机的内参矩阵
+        // Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
 
-        //相机的畸变系数
-        Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
-        distCoeffs.at<double>(0,0) = -0.157095872989630;
-        distCoeffs.at<double>(1,0) = 0.166823029778507;
-        distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
-        distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
-        distCoeffs.at<double>(4,0) = -0.070807947517560;
+        // //相机的畸变系数
+        // Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
+        // distCoeffs.at<double>(0,0) = -0.157095872989630;
+        // distCoeffs.at<double>(1,0) = 0.166823029778507;
+        // distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
+        // distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
+        // distCoeffs.at<double>(4,0) = -0.070807947517560;
 
-        //三维坐标
-        vector<Point3f> objectPoint{Point3f(0,145.5,215.75),Point3f(0,145.5,15.75),Point3f(0,45.5,115.75)};
+        // //三维坐标
+        // vector<Point3f> objectPoint{Point3f(0,145.5,215.75),Point3f(0,145.5,15.75),Point3f(0,45.5,115.75)};
 
-        //二维坐标
-        vector<Point2f> imagePoint{Point2f((float)upOrLeft.x,(float)upOrLeft.y),Point2f((float)downOrRight.x,(float)downOrRight.y),Point2f((float)middle.x,(float)middle.y)};
+        // //二维坐标
+        // vector<Point2f> imagePoint{Point2f((float)upOrLeft.x,(float)upOrLeft.y),Point2f((float)downOrRight.x,(float)downOrRight.y),Point2f((float)middle.x,(float)middle.y)};
 
-        //相机位姿态估计
-        Mat rvec;//旋转向量
-        Mat tvec;//平移向量
+        // //相机位姿态估计
+        // Mat rvec;//旋转向量
+        // Mat tvec;//平移向量
 
-        //pnp解算
-        solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
-        cout << "rvec = " << rvec << endl;
-        cout << "tvec = " << tvec << endl;
+        // //pnp解算
+        // solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
+        // cout << "rvec = " << rvec << endl;
+        // cout << "tvec = " << tvec << endl;
 
         // imshow("drawImage",drawImage);
     }
 
-    imshow("src",src);
+    imshow("output",src);
 
-    waitKey(0);
+    waitKey(40);
 
     return 0;
 }
