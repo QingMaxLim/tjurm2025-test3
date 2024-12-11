@@ -7,7 +7,7 @@
 using namespace std;
 using namespace cv;
 
-int main(int,char**){
+void solve(Mat src){
 
     //定义侧面的大拐角和四个锚点角
     vector<Point> MaxTriangleContour;
@@ -41,31 +41,31 @@ int main(int,char**){
     //     }
     // }
 
-    std::string folderPath = "../res/oreTrough"; // 修改为你的图片文件夹路径
-    DIR *dir;
-    struct dirent *ent;
-    Mat src;
-    if ((dir = opendir(folderPath.c_str())) != NULL) {
-        while ((ent = readdir (dir)) != NULL) {
-            if (ent->d_type == DT_REG) { // DT_REG 是一个文件
-                std::string imgName = folderPath + "/" + ent->d_name;
-                src = cv::imread(imgName);
-                if (!src.empty()) {
-                    cv::imshow("Image", src);
-                    int key = cv::waitKey(0); // 等待按键
-                    if (key == 27) { // 如果按键是ESC，则退出循环
-                        break;
-                    }
-                } else {
-                    std::cerr << "无法读取图片: " << imgName << std::endl;
-                }
-            }
-        }
-        closedir (dir);
-    } else {
-        std::cerr << "无法打开目录: " << folderPath << std::endl;
-        return -1;
-    }
+    // std::string folderPath = "../res/oreTrough"; // 修改为你的图片文件夹路径
+    // DIR *dir;
+    // struct dirent *ent;
+    // Mat src;
+    // if ((dir = opendir(folderPath.c_str())) != NULL) {
+    //     while ((ent = readdir (dir)) != NULL) {
+    //         if (ent->d_type == DT_REG) { // DT_REG 是一个文件
+    //             std::string imgName = folderPath + "/" + ent->d_name;
+    //             src = cv::imread(imgName);
+    //             if (!src.empty()) {
+    //                 cv::imshow("Image", src);
+    //                 int key = cv::waitKey(0); // 等待按键
+    //                 if (key == 27) { // 如果按键是ESC，则退出循环
+    //                     break;
+    //                 }
+    //             } else {
+    //                 std::cerr << "无法读取图片: " << imgName << std::endl;
+    //             }
+    //         }
+    //     }
+    //     closedir (dir);
+    // } else {
+    //     std::cerr << "无法打开目录: " << folderPath << std::endl;
+    //     return -1;
+    // }
     
     // imshow("src",src);
 
@@ -441,10 +441,32 @@ int main(int,char**){
 
         // imshow("drawImage",drawImage);
     }
+}
 
-    imshow("output",src);
+int main(int,char**){
+    
+    string imageFolder = "../res/station";
+    vector<String> images;
+    glob(imageFolder,images);
+    // cout << "图片数量：" << images.size() << endl;
 
-    waitKey(40);
+    VideoCapture capture;
+    Mat src;
+    for(size_t i = 0;i < images.size();i++){
+        src = imread(images[i]);
+        //如果读取失败就退出
+        if(src.empty()){
+            cout << "failed to read image..." << endl;
+            continue;
+        }
+
+        solve(src);
+
+        imshow("Video",src);
+        if(waitKey(100) == 27) break;//按esc退出，27为esc的ASCII码
+    }
+
+    destroyAllWindows();
 
     return 0;
 }
