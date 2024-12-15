@@ -174,6 +174,12 @@ void solve(Mat src){
         putText(src,"3",cornerThirdMoment,FONT_HERSHEY_SIMPLEX,1,Scalar(255,200,0),LINE_4);
         circle(src,cornerFourthMoment,5,Scalar(255,200,0),-1);
         putText(src,"4",cornerFourthMoment,FONT_HERSHEY_SIMPLEX,1,Scalar(255,200,0),LINE_4);
+
+        //找四个重心的大外界矩形
+        // vector<Point> points = {cornerFirstMoment,cornerSecondMomnet,cornerThirdMoment,cornerFourthMoment};
+        // RotatedRect rect = minAreaRect(points);
+        // Point core = rect.center;
+        // cout << core.x << " " << core.y << endl;
         
         // imshow("src",src);
 
@@ -200,8 +206,8 @@ void solve(Mat src){
 
         //pnp解算
         solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec);
-        cout << "rvec = " << rvec << endl;
-        cout << "tvec = " << tvec << endl;
+        // cout << "rvec = " << rvec << endl;
+        // cout << "tvec = " << tvec << endl;
 
         //坐标可视化
         vector<Point2f> toImagePoint;
@@ -246,7 +252,7 @@ void solve(Mat src){
 
         //图像进行角点检测，找出两端的点和中间的点
         vector<Point> corners;
-        goodFeaturesToTrack(drawImage,corners,3,0.1,30);//用于检测角点(特征点)
+        goodFeaturesToTrack(drawImage,corners,3,0.1,60);//用于检测角点(特征点)
 
         // cout << corners.size() << endl;
 
@@ -357,45 +363,79 @@ void solve(Mat src){
         circle(src,middle,5,cv::Scalar(255,200,0),-1);
         putText(src,"2",middle,cv::FONT_HERSHEY_SIMPLEX,1,cv::Scalar(255,200,0),cv::LINE_4);
 
-        //相机的内参矩阵
-        Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
+        if(upOrLeft.x != NULL && downOrRight.x != NULL && middle.x != NULL){
+            //相机的内参矩阵
+            Mat cameraMatrix = (Mat_<double>(3,3) << 1.521928836685752e+03,0,9.504930579948792e+02,0,1.521695508574793e+03,6.220985582938733e+02,0,0,1);
 
-        //相机的畸变系数
-        Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
-        distCoeffs.at<double>(0,0) = -0.157095872989630;
-        distCoeffs.at<double>(1,0) = 0.166823029778507;
-        distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
-        distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
-        distCoeffs.at<double>(4,0) = -0.070807947517560;
+            //相机的畸变系数
+            Mat distCoeffs = Mat::zeros(5,1,DataType<double>::type);
+            distCoeffs.at<double>(0,0) = -0.157095872989630;
+            distCoeffs.at<double>(1,0) = 0.166823029778507;
+            distCoeffs.at<double>(2,0) = 1.356728774532785e-04;
+            distCoeffs.at<double>(3,0) = 2.266474993725451e-04;
+            distCoeffs.at<double>(4,0) = -0.070807947517560;
 
-        //三维坐标
-        vector<Point3f> objectPoint{Point3f(0,145.5,215.75),Point3f(0,145.5,15.75),Point3f(0,45.5,115.75)};
+            //二维坐标
+            vector<Point2f> imagePoint{Point2f((float)upOrLeft.x,(float)upOrLeft.y),Point2f((float)downOrRight.x,(float)downOrRight.y),Point2f((float)middle.x,(float)middle.y)};
 
-        //二维坐标
-        vector<Point2f> imagePoint{Point2f((float)upOrLeft.x,(float)upOrLeft.y),Point2f((float)downOrRight.x,(float)downOrRight.y),Point2f((float)middle.x,(float)middle.y)};
+            if(middle.x > upOrLeft.x || middle.x > downOrRight.x){
+                //三维坐标
+                vector<Point3f> objectPoint{Point3f(0,155.5,235.75),Point3f(0,155.5,45.75),Point3f(0,55.5,135.75)};
 
-        //相机位姿态估计
-        Mat rvec;//旋转向量
-        Mat tvec;//平移向量
+                //相机位姿态估计
+                Mat rvec;//旋转向量
+                Mat tvec;//平移向量
 
-        //pnp解算
-        solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
-        cout << "rvec = " << rvec << endl;
-        cout << "tvec = " << tvec << endl;
+                //pnp解算
+                solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
+                // cout << "rvec = " << rvec << endl;
+                // cout << "tvec = " << tvec << endl;
 
-        //坐标可视化
-        vector<Point2f> toImagePoint;
-        vector<Point3f> fromObjectPoint = {Point3f(0,0,0),Point3f(50,0,0),Point3f(0,50,0),Point3f(0,0,50)};
+                //坐标可视化
+                vector<Point2f> toImagePoint;
+                vector<Point3f> fromObjectPoint = {Point3f(0,0,0),Point3f(50,0,0),Point3f(0,50,0),Point3f(0,0,50)};
 
-        projectPoints(fromObjectPoint,rvec,tvec,cameraMatrix,distCoeffs,toImagePoint);
-        // cout << toImagePoint <<endl;
-        for(int i = 0;i < toImagePoint.size();i++){
-            circle(src,toImagePoint[2],3,Scalar(255,255,0));
+                projectPoints(fromObjectPoint,rvec,tvec,cameraMatrix,distCoeffs,toImagePoint);
+                // cout << toImagePoint <<endl;
+                for(int i = 0;i < toImagePoint.size();i++){
+                    circle(src,toImagePoint[2],3,Scalar(255,255,0));
+                }
+
+                line(src,toImagePoint[0],toImagePoint[3],Scalar(255,0,0),2);
+                line(src,toImagePoint[0],toImagePoint[1],Scalar(0,255,0),2);
+                line(src,toImagePoint[0],toImagePoint[2],Scalar(0,0,255),2);
+            }
+
+            if(middle.x < upOrLeft.x || middle.x < downOrRight.x){
+                //三维坐标
+                // vector<Point3f> objectPoint{Point3f(231.5,195.5,235.75),Point3f(231.5,195.5,45.75),Point3f(231.5,95.5,135.75)};
+                vector<Point3f> objectPoint{Point3f(231.5,155.5,235.75),Point3f(231.5,155.5,45.75),Point3f(231.5,55.5,135.75)};
+
+                //相机位姿态估计
+                Mat rvec;//旋转向量
+                Mat tvec;//平移向量
+
+                //pnp解算
+                solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
+                // cout << "rvec = " << rvec << endl;
+                // cout << "tvec = " << tvec << endl;
+
+                //坐标可视化
+                vector<Point2f> toImagePoint;
+                vector<Point3f> fromObjectPoint = {Point3f(0,0,0),Point3f(50,0,0),Point3f(0,50,0),Point3f(0,0,50)};
+
+                projectPoints(fromObjectPoint,rvec,tvec,cameraMatrix,distCoeffs,toImagePoint);
+                // cout << toImagePoint <<endl;
+                for(int i = 0;i < toImagePoint.size();i++){
+                    circle(src,toImagePoint[2],3,Scalar(255,255,0));
+                }
+
+                line(src,toImagePoint[0],toImagePoint[3],Scalar(255,0,0),2);
+                line(src,toImagePoint[0],toImagePoint[1],Scalar(0,255,0),2);
+                line(src,toImagePoint[0],toImagePoint[2],Scalar(0,0,255),2);
+            }
         }
 
-        line(src,toImagePoint[0],toImagePoint[3],Scalar(255,0,0),2);
-        line(src,toImagePoint[0],toImagePoint[1],Scalar(0,255,0),2);
-        line(src,toImagePoint[0],toImagePoint[2],Scalar(0,0,255),2);
 
         // imshow("drawImage",drawImage);
     }
@@ -403,7 +443,10 @@ void solve(Mat src){
 
 int main(int,char**){
     
-    string imageFolder = "../res/station/station";
+    // string imageFolder = "../res/station/station";
+    // string imageFolder = "../res/station1";
+    // string imageFolder = "../res/station2";
+    string imageFolder = "../res/station3";
     vector<String> images;
     glob(imageFolder,images);
     cout << "图片数量：" << images.size() << endl;
