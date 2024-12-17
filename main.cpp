@@ -206,8 +206,8 @@ void solve(Mat src){
 
         //pnp解算
         solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec);
-        // cout << "rvec = " << rvec << endl;
-        // cout << "tvec = " << tvec << endl;
+        cout << "rvec = " << rvec << endl;
+        cout << "tvec = " << tvec << endl;
 
         //坐标可视化
         vector<Point2f> toImagePoint;
@@ -388,8 +388,8 @@ void solve(Mat src){
 
                 //pnp解算
                 solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
-                // cout << "rvec = " << rvec << endl;
-                // cout << "tvec = " << tvec << endl;
+                cout << "rvec = " << rvec << endl;
+                cout << "tvec = " << tvec << endl;
 
                 //坐标可视化
                 vector<Point2f> toImagePoint;
@@ -417,8 +417,8 @@ void solve(Mat src){
 
                 //pnp解算
                 solvePnP(objectPoint,imagePoint,cameraMatrix,distCoeffs,rvec,tvec,false,SOLVEPNP_SQPNP);
-                // cout << "rvec = " << rvec << endl;
-                // cout << "tvec = " << tvec << endl;
+                cout << "rvec = " << rvec << endl;
+                cout << "tvec = " << tvec << endl;
 
                 //坐标可视化
                 vector<Point2f> toImagePoint;
@@ -443,10 +443,10 @@ void solve(Mat src){
 
 int main(int,char**){
     
-    // string imageFolder = "../res/station/station";
+    string imageFolder = "../res/station/station";
     // string imageFolder = "../res/station1";
     // string imageFolder = "../res/station2";
-    string imageFolder = "../res/station3";
+    // string imageFolder = "../res/station3";
     vector<String> images;
     glob(imageFolder,images);
     cout << "图片数量：" << images.size() << endl;
